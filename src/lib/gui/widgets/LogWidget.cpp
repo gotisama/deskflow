@@ -9,6 +9,7 @@
 
 #include <gui/Logger.h>
 
+#include <QFont>
 #include <QPlainTextEdit>
 #include <QScrollBar>
 #include <QVBoxLayout>
@@ -20,7 +21,18 @@ LogWidget::LogWidget(QWidget *parent) : QWidget{parent}, m_textLog{new QPlainTex
   m_textLog->setLineWrapMode(QPlainTextEdit::NoWrap);
 
   // setup the log font
-  m_textLog->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+  //
+  // Don't use QFontDatabase::systemFont(FixedFont): on Windows it historically
+  // resolves to "Fixedsys", a legacy raster font. Qt 6.10's DirectWrite-based
+  // font engine cannot load raster fonts via CreateFontFaceFromHDC() and
+  // dereferences a null face on the failure path, crashing Qt6Gui.dll with
+  // c0000005 during MainWindow construction. Pick a TrueType monospace family
+  // explicitly and let Qt fall back via the Monospace style hint.
+  QFont logFont;
+  logFont.setFamilies({"Cascadia Mono", "Consolas", "Menlo", "DejaVu Sans Mono", "Liberation Mono", "Monospace"});
+  logFont.setStyleHint(QFont::Monospace);
+  logFont.setFixedPitch(true);
+  m_textLog->setFont(logFont);
   if (deskflow::platform::isMac()) {
     auto f = m_textLog->font();
     f.setPixelSize(12);
