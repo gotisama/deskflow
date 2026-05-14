@@ -149,6 +149,12 @@ int main(int argc, char *argv[])
     diagnostic::clearSettings(false);
   }
 
+  // Keep app alive when main window is hidden and tray icon may have failed to
+  // register (seen on some Windows 11 builds with Qt 6.10). Without this, Qt's
+  // default quitOnLastWindowClosed terminates the GUI process silently right
+  // after autoHide fires.
+  QApplication::setQuitOnLastWindowClosed(false);
+
   MainWindow mainWindow;
   mainWindow.open();
 
