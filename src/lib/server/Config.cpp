@@ -17,9 +17,7 @@
 #include "net/SocketException.h"
 #include "server/Server.h"
 
-#include <algorithm>
 #include <assert.h>
-#include <cctype>
 #include <cstdlib>
 #include <istream>
 #include <ostream>
@@ -667,16 +665,14 @@ void Config::readSectionOptions(ConfigReadContext &s)
     } else if (name == "switchNeedsAlt") {
       addOption("", kOptionScreenSwitchNeedsAlt, s.parseBoolean(value));
     } else if (name == "leaveServerNeedsModifier") {
-      std::string v = value;
-      std::transform(v.begin(), v.end(), v.begin(), [](unsigned char c) { return std::tolower(c); });
       int code = 0;
-      if (v == "shift")
+      if (CaselessCmp::equal(value, "shift"))
         code = 1;
-      else if (v == "control")
+      else if (CaselessCmp::equal(value, "control"))
         code = 2;
-      else if (v == "alt")
+      else if (CaselessCmp::equal(value, "alt"))
         code = 3;
-      else if (v == "none")
+      else if (CaselessCmp::equal(value, "none"))
         code = 0;
       else
         throw ServerConfigReadException(s, std::string("invalid leaveServerNeedsModifier: ") + value);
