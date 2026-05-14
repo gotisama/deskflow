@@ -1080,6 +1080,9 @@ void Server::processOptions()
   m_switchNeedsShift = false;   // it seems if i don't add these
   m_switchNeedsControl = false; // lines, the 'reload config' option
   m_switchNeedsAlt = false;     // doesnt' work correct.
+  m_leaveServerNeedsModifier = false;
+  m_leaveServerModifierMask = KeyModifierControl;
+  m_returnToServerInstant = false;
 
   bool newRelativeMoves = m_relativeMoves;
   for (auto [optionId, optionValue] : *options) {
@@ -1103,6 +1106,26 @@ void Server::processOptions()
       m_switchNeedsShift = (value != 0);
     } else if (id == kOptionScreenSwitchNeedsAlt) {
       m_switchNeedsAlt = (value != 0);
+    } else if (id == kOptionLeaveServerNeedsModifier) {
+      switch (value) {
+      case 1:
+        m_leaveServerNeedsModifier = true;
+        m_leaveServerModifierMask = KeyModifierShift;
+        break;
+      case 2:
+        m_leaveServerNeedsModifier = true;
+        m_leaveServerModifierMask = KeyModifierControl;
+        break;
+      case 3:
+        m_leaveServerNeedsModifier = true;
+        m_leaveServerModifierMask = KeyModifierAlt;
+        break;
+      default:
+        m_leaveServerNeedsModifier = false;
+        break;
+      }
+    } else if (id == kOptionReturnToServerInstant) {
+      m_returnToServerInstant = (value != 0);
     } else if (id == kOptionRelativeMouseMoves) {
       newRelativeMoves = (value != 0);
     } else if (id == kOptionDefaultLockToScreenState) {

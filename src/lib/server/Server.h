@@ -459,6 +459,11 @@ private:
   bool m_switchNeedsControl = false;
   bool m_switchNeedsAlt = false;
 
+  // asymmetric switch rules (server <-> client direction)
+  bool m_leaveServerNeedsModifier = false;
+  KeyModifierMask m_leaveServerModifierMask = KeyModifierControl;
+  bool m_returnToServerInstant = false;
+
   // relative mouse move option
   bool m_relativeMoves = false;
 
