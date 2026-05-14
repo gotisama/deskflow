@@ -7,7 +7,10 @@
 
 #include "ServerConfigTests.h"
 
+#include "deskflow/OptionTypes.h"
 #include "server/Config.h"
+
+#include <sstream>
 
 class OnlySystemFilter : public InputFilter::Condition
 {
@@ -159,6 +162,48 @@ void ServerConfigTests::equalityCheck_diff_neighbours3()
   QVERIFY(b.addScreen("screenC"));
   QVERIFY(b.connect("screenA", Direction::Bottom, 0.0f, 0.5f, "screenC", 0.5f, 1.0f));
   QVERIFY(a != b);
+}
+
+void ServerConfigTests::parseLeaveServerNeedsModifier()
+{
+  // "shift" maps to code 1 in readSectionOptions
+  Config cfg(nullptr);
+  std::istringstream input("section: options\n\tleaveServerNeedsModifier = shift\nend\n");
+  input >> cfg;
+
+  const Config::ScreenOptions *opts = cfg.getOptions("");
+  QVERIFY(opts != nullptr);
+  auto it = opts->find(kOptionLeaveServerNeedsModifier);
+  QVERIFY(it != opts->end());
+  QCOMPARE(it->second, static_cast<OptionValue>(1));
+}
+
+void ServerConfigTests::parseReturnToServerInstant()
+{
+  // "true" is parsed by parseBoolean which returns 1
+  Config cfg(nullptr);
+  std::istringstream input("section: options\n\treturnToServerInstant = true\nend\n");
+  input >> cfg;
+
+  const Config::ScreenOptions *opts = cfg.getOptions("");
+  QVERIFY(opts != nullptr);
+  auto it = opts->find(kOptionReturnToServerInstant);
+  QVERIFY(it != opts->end());
+  QCOMPARE(it->second, static_cast<OptionValue>(1));
+}
+
+void ServerConfigTests::parseInvalidLeaveServerNeedsModifier()
+{
+  using deskflow::server::ServerConfigReadException;
+  Config cfg(nullptr);
+  std::istringstream input("section: options\n\tleaveServerNeedsModifier = bogus\nend\n");
+  bool threw = false;
+  try {
+    input >> cfg;
+  } catch (const ServerConfigReadException &) {
+    threw = true;
+  }
+  QVERIFY(threw);
 }
 
 QTEST_MAIN(ServerConfigTests)
