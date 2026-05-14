@@ -19,6 +19,7 @@
 
 #include <QApplication>
 #include <QCommandLineParser>
+#include <QFont>
 #include <QLocalSocket>
 #include <QMessageBox>
 #include <QSharedMemory>
@@ -62,6 +63,20 @@ int main(int argc, char *argv[])
   QGuiApplication::setDesktopFileName(kRevFqdnName);
 
   QApplication app(argc, argv);
+
+#if defined(Q_OS_WIN)
+  // Qt 6.10 on Windows crashes in Qt6Gui.dll (CreateFontFaceFromHDC null deref,
+  // c0000005) when DirectWrite is asked to load the legacy raster font
+  // "Fixedsys". Qt's internal font handling resolves Fixedsys for fixed-pitch
+  // defaults (QPlainTextEdit, QFontDatabase::systemFont(FixedFont)) and for
+  // some monospace fallbacks, hitting the crash before MainWindow finishes
+  // constructing. Substitute Fixedsys with TrueType monospace families so
+  // DirectWrite never sees it. Qt walks the list in order until one is found.
+  QFont::insertSubstitutions(
+      QStringLiteral("Fixedsys"),
+      {QStringLiteral("Cascadia Mono"), QStringLiteral("Consolas"), QStringLiteral("Courier New")}
+  );
+#endif
 
   // Ensure the I18N object is made before strings
   QTextStream(stdout) << "initial language: " << I18N::currentLanguage() << '\n';
