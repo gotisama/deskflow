@@ -777,6 +777,9 @@ bool Server::isSwitchOkay(
     return false;
   }
 
+  const bool leavingServer = (m_active == m_primaryClient);
+  const bool enteringServer = (newScreen == m_primaryClient);
+
   // should we switch or not?
   bool preventSwitch = false;
   bool allowSwitch = false;
@@ -790,7 +793,7 @@ bool Server::isSwitchOkay(
   }
 
   // is this a double tap and do we care?
-  if (!allowSwitch && m_switchTwoTapDelay > 0.0) {
+  if (!allowSwitch && m_switchTwoTapDelay > 0.0 && !(enteringServer && m_returnToServerInstant)) {
     if (isNewDirection || !isSwitchTwoTapStarted() || !shouldSwitchTwoTap()) {
       // tapping a different or new edge or second tap not
       // fast enough.  prepare for second tap.
@@ -803,7 +806,7 @@ bool Server::isSwitchOkay(
   }
 
   // if waiting before a switch then prepare to switch later
-  if (!allowSwitch && m_switchWaitDelay > 0.0) {
+  if (!allowSwitch && m_switchWaitDelay > 0.0 && !(enteringServer && m_returnToServerInstant)) {
     if (isNewDirection || !isSwitchWaitStarted()) {
       startSwitchWait(x, y);
     }
@@ -843,13 +846,31 @@ bool Server::isSwitchOkay(
   }
 
   // check for optional needed modifiers
-  if (KeyModifierMask mods = this->m_primaryClient->getToggleMask();
-      !preventSwitch && ((this->m_switchNeedsShift && ((mods & KeyModifierShift) != KeyModifierShift)) ||
-                         (this->m_switchNeedsControl && ((mods & KeyModifierControl) != KeyModifierControl)) ||
-                         (this->m_switchNeedsAlt && ((mods & KeyModifierAlt) != KeyModifierAlt)))) {
-    LOG_DEBUG1("need modifiers to switch");
-    preventSwitch = true;
-    stopSwitch();
+  if (!preventSwitch) {
+    KeyModifierMask mods = m_primaryClient->getToggleMask();
+    bool needShift = m_switchNeedsShift;
+    bool needControl = m_switchNeedsControl;
+    bool needAlt = m_switchNeedsAlt;
+
+    // asymmetric rule: leaving server may require an additional modifier
+    if (leavingServer && m_leaveServerNeedsModifier) {
+      needShift |= (m_leaveServerModifierMask == KeyModifierShift);
+      needControl |= (m_leaveServerModifierMask == KeyModifierControl);
+      needAlt |= (m_leaveServerModifierMask == KeyModifierAlt);
+    }
+
+    // asymmetric rule: returning to server bypasses all modifier requirements
+    if (enteringServer && m_returnToServerInstant) {
+      needShift = needControl = needAlt = false;
+    }
+
+    if ((needShift && ((mods & KeyModifierShift) != KeyModifierShift)) ||
+        (needControl && ((mods & KeyModifierControl) != KeyModifierControl)) ||
+        (needAlt && ((mods & KeyModifierAlt) != KeyModifierAlt))) {
+      LOG_DEBUG1("need modifiers to switch");
+      preventSwitch = true;
+      stopSwitch();
+    }
   }
 
   return !preventSwitch;
