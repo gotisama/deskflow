@@ -93,6 +93,18 @@ public:
   {
     return m_SwitchDoubleTap;
   }
+  bool leaveServerNeedsModifier() const
+  {
+    return m_LeaveServerNeedsModifier;
+  }
+  int leaveServerModifier() const
+  {
+    return m_LeaveServerModifier;
+  }
+  bool returnToServerInstant() const
+  {
+    return m_ReturnToServerInstant;
+  }
   bool switchCorner(int c) const
   {
     return m_SwitchCorners[c];
@@ -199,6 +211,18 @@ private:
   {
     m_SwitchDoubleTap = val;
   }
+  void setLeaveServerNeedsModifier(bool on)
+  {
+    m_LeaveServerNeedsModifier = on;
+  }
+  void setLeaveServerModifier(int idx)
+  {
+    m_LeaveServerModifier = idx;
+  }
+  void setReturnToServerInstant(bool on)
+  {
+    m_ReturnToServerInstant = on;
+  }
   void setSwitchCorner(int c, bool on)
   {
     m_SwitchCorners[c] = on;
@@ -244,6 +268,9 @@ private:
   int m_SwitchDelay = 0;
   bool m_HasSwitchDoubleTap = false;
   int m_SwitchDoubleTap = 0;
+  bool m_LeaveServerNeedsModifier = false;
+  int m_LeaveServerModifier = 0;  // 0=Ctrl, 1=Shift, 2=Alt (GUI index)
+  bool m_ReturnToServerInstant = false;
   int m_SwitchCornerSize = 0;
   bool m_DefaultLockToScreenState = false;
   bool m_DisableLockToScreen = false;

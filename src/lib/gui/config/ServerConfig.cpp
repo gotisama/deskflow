@@ -64,6 +64,9 @@ bool ServerConfig::operator==(const ServerConfig &sc) const
          m_SwitchDelay == sc.m_SwitchDelay &&                           //
          m_HasSwitchDoubleTap == sc.m_HasSwitchDoubleTap &&             //
          m_SwitchDoubleTap == sc.m_SwitchDoubleTap &&                   //
+         m_LeaveServerNeedsModifier == sc.m_LeaveServerNeedsModifier && //
+         m_LeaveServerModifier == sc.m_LeaveServerModifier &&           //
+         m_ReturnToServerInstant == sc.m_ReturnToServerInstant &&       //
          m_SwitchCornerSize == sc.m_SwitchCornerSize &&                 //
          m_SwitchCorners == sc.m_SwitchCorners &&                       //
          m_Hotkeys == sc.m_Hotkeys &&                                   //
@@ -113,6 +116,9 @@ void ServerConfig::commit()
   settings().setValue("switchDelay", switchDelay());
   settings().setValue("hasSwitchDoubleTap", hasSwitchDoubleTap());
   settings().setValue("switchDoubleTap", switchDoubleTap());
+  settings().setValue("leaveServerNeedsModifier", leaveServerNeedsModifier());
+  settings().setValue("leaveServerModifier", leaveServerModifier());
+  settings().setValue("returnToServerInstant", returnToServerInstant());
   settings().setValue("switchCornerSize", switchCornerSize());
   settings().setValue("defaultLockToScreenState", defaultLockToScreenState());
   settings().setValue("disableLockToScreen", disableLockToScreen());
@@ -165,6 +171,9 @@ void ServerConfig::recall()
   setSwitchDelay(settings().value("switchDelay", 250).toInt());
   haveSwitchDoubleTap(settings().value("hasSwitchDoubleTap", false).toBool());
   setSwitchDoubleTap(settings().value("switchDoubleTap", 250).toInt());
+  setLeaveServerNeedsModifier(settings().value("leaveServerNeedsModifier", false).toBool());
+  setLeaveServerModifier(settings().value("leaveServerModifier", 0).toInt());
+  setReturnToServerInstant(settings().value("returnToServerInstant", false).toBool());
   setSwitchCornerSize(settings().value("switchCornerSize").toInt());
   setDefaultLockToScreenState(settings().value("defaultLockToScreenState", false).toBool());
   setDisableLockToScreen(settings().value("disableLockToScreen", false).toBool());
@@ -281,6 +290,18 @@ QTextStream &operator<<(QTextStream &outStream, const ServerConfig &config)
   if (config.hasSwitchDoubleTap())
     outStream << "\t"
               << "switchDoubleTap = " << config.switchDoubleTap() << Qt::endl;
+
+  if (config.leaveServerNeedsModifier()) {
+    static const char *kNames[] = {"control", "shift", "alt"};
+    int idx = config.leaveServerModifier();
+    if (idx < 0 || idx > 2)
+      idx = 0;
+    outStream << "\t" << "leaveServerNeedsModifier = " << kNames[idx] << Qt::endl;
+  }
+
+  if (config.returnToServerInstant()) {
+    outStream << "\t" << "returnToServerInstant = true" << Qt::endl;
+  }
 
   outStream << "\t"
             << "switchCorners = none ";
