@@ -1086,6 +1086,26 @@ Al habilitar esta opción, se deshabilitará la interfaz gráfica de usuario (GU
         <source>Enable lock to computer at startup</source>
         <translation type="unfinished">Activar el bloqueo del ordenador al iniciar</translation>
     </message>
+    <message>
+        <source>Hold modifier to &amp;leave server</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl</source>
+        <translation type="unfinished">Ctrl</translation>
+    </message>
+    <message>
+        <source>Shift</source>
+        <translation type="unfinished">Shift</translation>
+    </message>
+    <message>
+        <source>Alt</source>
+        <translation type="unfinished">Alt</translation>
+    </message>
+    <message>
+        <source>&amp;Return to server without waiting</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SettingsDialog</name>

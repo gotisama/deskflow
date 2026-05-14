@@ -313,11 +313,6 @@ jobs:
         run: |
           if [[ `git status --porcelain` ]]; then
             echo "Unexpected changes to the repo, Often caused by forgetting to commit the updated translation files"
-            echo "--- git status ---"
-            git status --porcelain
-            echo "--- git diff (truncated) ---"
-            git diff --stat
-            git diff | head -200
             exit 1
           fi
 

@@ -1088,6 +1088,26 @@ Enabling this setting will disable the server config GUI.</source>
         <source>Enable lock to computer at startup</source>
         <translation>起動時にコンピューター間移動のロックを有効にする</translation>
     </message>
+    <message>
+        <source>Hold modifier to &amp;leave server</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl</source>
+        <translation type="unfinished">Ctrl</translation>
+    </message>
+    <message>
+        <source>Shift</source>
+        <translation type="unfinished">Shift</translation>
+    </message>
+    <message>
+        <source>Alt</source>
+        <translation type="unfinished">Alt</translation>
+    </message>
+    <message>
+        <source>&amp;Return to server without waiting</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SettingsDialog</name>
