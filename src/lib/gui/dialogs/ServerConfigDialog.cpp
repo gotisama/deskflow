@@ -103,6 +103,24 @@ ServerConfigDialog::ServerConfigDialog(QWidget *parent, ServerConfig &config)
       ui->sbSwitchDoubleTap, QOverload<int>::of(&QSpinBox::valueChanged), this, &ServerConfigDialog::setSwitchDoubleTap
   );
 
+  ui->cbLeaveServerNeedsModifier->setChecked(serverConfig().leaveServerNeedsModifier());
+  ui->cmbLeaveServerModifier->setEnabled(ui->cbLeaveServerNeedsModifier->isChecked());
+  ui->cmbLeaveServerModifier->setCurrentIndex(serverConfig().leaveServerModifier());
+  connect(
+      ui->cbLeaveServerNeedsModifier, &QCheckBox::toggled, this,
+      &ServerConfigDialog::toggleLeaveServerNeedsModifier
+  );
+  connect(
+      ui->cmbLeaveServerModifier, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
+      &ServerConfigDialog::setLeaveServerModifier
+  );
+
+  ui->cbReturnToServerInstant->setChecked(serverConfig().returnToServerInstant());
+  connect(
+      ui->cbReturnToServerInstant, &QCheckBox::toggled, this,
+      &ServerConfigDialog::toggleReturnToServerInstant
+  );
+
   connect(ui->cbRelativeMouseMoves, &QCheckBox::toggled, this, &ServerConfigDialog::toggleRelativeMouseMoves);
   connect(ui->cbEnableClipboard, &QCheckBox::toggled, this, &ServerConfigDialog::toggleClipboard);
 
@@ -431,6 +449,25 @@ void ServerConfigDialog::toggleSwitchDelay(bool enable)
 void ServerConfigDialog::setSwitchDelay(int delay)
 {
   serverConfig().setSwitchDelay(delay);
+  onChange();
+}
+
+void ServerConfigDialog::toggleLeaveServerNeedsModifier(bool enable)
+{
+  m_serverConfig.setLeaveServerNeedsModifier(enable);
+  ui->cmbLeaveServerModifier->setEnabled(enable);
+  onChange();
+}
+
+void ServerConfigDialog::setLeaveServerModifier(int index)
+{
+  m_serverConfig.setLeaveServerModifier(index);
+  onChange();
+}
+
+void ServerConfigDialog::toggleReturnToServerInstant(bool enable)
+{
+  m_serverConfig.setReturnToServerInstant(enable);
   onChange();
 }
 

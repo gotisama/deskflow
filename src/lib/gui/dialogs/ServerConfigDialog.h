@@ -59,6 +59,10 @@ protected:
   void toggleSwitchDelay(bool enable);
   void setSwitchDelay(int delay);
 
+  void toggleLeaveServerNeedsModifier(bool enable);
+  void setLeaveServerModifier(int index);
+  void toggleReturnToServerInstant(bool enable);
+
   void toggleDefaultLockToScreenState(bool state);
   void toggleLockToScreen(bool disabled);
   void toggleWin32Foreground(bool enabled);
