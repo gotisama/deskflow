@@ -800,6 +800,59 @@
            </layout>
           </item>
           <item>
+           <layout class="QHBoxLayout" name="_7">
+            <item>
+             <widget class="QCheckBox" name="cbLeaveServerNeedsModifier">
+              <property name="text">
+               <string>Hold modifier to &amp;leave server</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="spacerLeaveServerModifier">
+              <property name="orientation">
+               <enum>Qt::Orientation::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QComboBox" name="cmbLeaveServerModifier">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <item>
+               <property name="text">
+                <string>Ctrl</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Shift</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Alt</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="cbReturnToServerInstant">
+            <property name="text">
+             <string>&amp;Return to server without waiting</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <spacer name="verticalSpacer_5">
             <property name="orientation">
              <enum>Qt::Orientation::Vertical</enum>
