@@ -1090,23 +1090,23 @@ Enabling this setting will disable the server config GUI.</source>
     </message>
     <message>
         <source>Hold modifier to &amp;leave server</source>
-        <translation type="unfinished"></translation>
+        <translation>按住修饰键离开服务器(&amp;L)</translation>
     </message>
     <message>
         <source>Ctrl</source>
-        <translation type="unfinished">Ctrl</translation>
+        <translation>Ctrl</translation>
     </message>
     <message>
         <source>Shift</source>
-        <translation type="unfinished">Shift</translation>
+        <translation>Shift</translation>
     </message>
     <message>
         <source>Alt</source>
-        <translation type="unfinished">Alt</translation>
+        <translation>Alt</translation>
     </message>
     <message>
         <source>&amp;Return to server without waiting</source>
-        <translation type="unfinished"></translation>
+        <translation>返回服务器无需等待(&amp;R)</translation>
     </message>
 </context>
 <context>
