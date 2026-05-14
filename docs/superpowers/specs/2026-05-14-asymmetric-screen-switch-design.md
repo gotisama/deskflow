@@ -1,131 +1,122 @@
-# Asymmetric Screen Switch Rules — Design
+# 非对称屏幕切换规则 — 设计
 
-Date: 2026-05-14
-Status: Approved (design phase)
-Scope: Server Configuration → Advanced tab
+日期: 2026-05-14
+状态: 设计阶段已审批
+作用范围: 服务器配置 → 高级标签页
 
-## Problem
+## 问题
 
-Deskflow's edge-based screen switching applies the same rules in both directions
-(server→client and client→server). A user wants asymmetric behavior:
+Deskflow 的撞边切换目前对"服务器→客户端"和"客户端→服务器"两个方向应用同一套规则。
+用户希望非对称行为：
 
-- Leaving the server (server → client) must require holding a modifier key (Ctrl by default)
-  so the cursor doesn't slip into the client by accident.
-- Returning to the server (client → server) must be instantaneous — no wait delay,
-  no double-tap, no modifier requirement.
+- 离开服务器（服务器 → 客户端）时必须按住修饰键（默认 Ctrl），
+  防止鼠标误滑进客户端。
+- 返回服务器（客户端 → 服务器）时立即生效——不等待、不需双击、不要修饰键。
 
-The existing `switchNeedsShift/Control/Alt` options exist but apply to both directions
-uniformly. There is no per-direction control today.
+现存的 `switchNeedsShift/Control/Alt` 选项虽存在，但对两个方向同样生效。
+目前没有任何按方向区分的控制能力。
 
-## Goals
+## 目标
 
-- Let the user configure asymmetric switch rules via two new checkboxes in the
-  Server Configuration → Advanced → Switching group.
-- Preserve full backward compatibility: when neither checkbox is enabled, behavior
-  is identical to today.
-- Coexist with existing wait-delay, double-tap, and global modifier-needed options.
+- 在 服务器配置 → 高级 → Switching 分组下增加两个新 checkbox，让用户配置非对称切换规则。
+- 完全向后兼容：两个 checkbox 都不勾时，行为与今天完全一致。
+- 与现有的 wait-delay、double-tap、全局 modifier-needed 选项共存。
 
-## Non-Goals
+## 非目标
 
-- Generalizing to N-direction asymmetric rules (e.g., per-edge or per-client).
-- Replacing or migrating away from existing switch options.
-- Changing the `[options]` config file grammar in a backward-incompatible way.
+- 推广到 N 方向非对称规则（如按边或按客户端各自配置）。
+- 替换或迁移现有切换选项。
+- 用不兼容方式修改 `[options]` 配置文件语法。
 
-## User-Visible Behavior
+## 用户可见行为
 
-Two new controls appear in the Switching group of the Advanced tab, after the
-existing "Switch on double tap" row:
+在高级标签页 Switching 分组里、"Switch on double tap" 这行下方新增两个控件：
 
 ```
-☐ Hold [Ctrl ▼] to leave server
-☐ Return to server without waiting
+☐ Hold [Ctrl ▼] to leave server      ← Checkbox A + 下拉菜单
+☐ Return to server without waiting    ← Checkbox B
 ```
 
-- The modifier ComboBox offers Ctrl (default selection), Shift, Alt.
-- The ComboBox is disabled when its checkbox is unchecked.
-- The two checkboxes are independent of each other (no enable/disable coupling).
+- 下拉菜单选项：Ctrl（默认）/ Shift / Alt。
+- 当 checkbox A 未勾选时下拉菜单灰显（disabled）。
+- 两个 checkbox 互相独立，没有联动启用/禁用。
 
-Behavior matrix:
+行为矩阵：
 
-| Hold modifier | Instant return | Server → Client                    | Client → Server                       |
-|---------------|----------------|------------------------------------|---------------------------------------|
-| ☐             | ☐              | Current behavior                   | Current behavior                      |
-| ☑ (Ctrl)      | ☐              | Edge hit AND Ctrl held → switch    | Current behavior (wait/double-tap)    |
-| ☐             | ☑              | Current behavior                   | Edge hit → switch immediately         |
-| ☑ (Ctrl)      | ☑              | **Target use case:** Ctrl + edge   | Instant on edge hit, no modifier      |
+| 离开需修饰键 | 返回即时 | 服务器 → 客户端                | 客户端 → 服务器                  |
+|--------------|----------|--------------------------------|----------------------------------|
+| ☐            | ☐        | 现有行为                       | 现有行为                         |
+| ☑ (Ctrl)     | ☐        | 撞边 AND 按住 Ctrl → 切换      | 现有行为（wait/double-tap）      |
+| ☐            | ☑        | 现有行为                       | 撞边即切                         |
+| ☑ (Ctrl)     | ☑        | **目标场景：** Ctrl + 撞边     | 撞边即切，无需修饰键             |
 
-"Current behavior" = existing `switchDelay`, `switchDoubleTap`,
-`switchNeedsShift/Control/Alt` apply as configured.
+"现有行为" = 现有的 `switchDelay`、`switchDoubleTap`、`switchNeedsShift/Control/Alt`
+按其各自配置生效。
 
-When "Return to server without waiting" is enabled, the client→server direction
-bypasses:
+当 "Return to server without waiting" 启用时，客户端→服务器方向会绕过：
 
-- `switchDelay` (wait delay)
-- `switchDoubleTap` (double-tap requirement)
-- `switchNeedsShift/Control/Alt` (global modifier requirement)
-- The new `leaveServerNeedsModifier` (which logically wouldn't apply going *into*
-  the server anyway, but is excluded explicitly for clarity)
+- `switchDelay`（等待延迟）
+- `switchDoubleTap`（双击要求）
+- `switchNeedsShift/Control/Alt`（全局修饰键要求）
+- 新增的 `leaveServerNeedsModifier`（按逻辑也不该在进入服务器时生效，
+  这里显式列出以求清晰）
 
-It does NOT bypass:
+不会绕过：
 
-- "No neighbor exists" (structural — no destination)
-- "Locked to screen" (user explicitly locked)
-- "Locked in dead corner" (safety configuration)
+- "没有邻居屏幕"（结构性——无目的地）
+- "锁定到屏幕"（用户主动锁定）
+- "锁在死角"（安全配置）
 
-These are correctness/safety constraints, not UX gates.
+这些是正确性 / 安全约束，不是用户体验门槛。
 
-## Architecture
+## 架构
 
-The change is local. No new modules, no new abstractions.
+改动局部。无新模块，无新抽象。
 
 ```
 ┌─────────────────────────────────────┐
 │ ServerConfigDialog (Qt UI)          │
-│  - 2 new widgets bound to fields    │
+│  - 新增 2 个控件，绑到字段          │
 └──────────────┬──────────────────────┘
-               │ (Qt data binding)
+               │ (Qt 数据绑定)
 ┌──────────────▼──────────────────────┐
-│ ServerConfig (GUI model, QSettings) │
-│  - 3 new fields + getters/setters   │
-│  - Serializes to .conf text         │
+│ ServerConfig (GUI 模型, QSettings)  │
+│  - 新增 3 个字段 + getter/setter    │
+│  - 序列化为 .conf 文本              │
 └──────────────┬──────────────────────┘
-               │ (config file text)
+               │ (配置文件文本)
 ┌──────────────▼──────────────────────┐
-│ Config (server, parses .conf)       │
-│  - 2 new keywords in readOption()   │
-│  - Writes 2 new fields onto Server  │
+│ Config (server, 解析 .conf)         │
+│  - readOption() 增 2 个关键字       │
+│  - 把新值写入 Server 实例           │
 └──────────────┬──────────────────────┘
                │
 ┌──────────────▼──────────────────────┐
-│ Server (core, runtime logic)        │
-│  - 3 new fields                     │
-│  - isSwitchOkay() direction-aware   │
+│ Server (核心运行时逻辑)             │
+│  - 新增 3 个字段                    │
+│  - isSwitchOkay() 区分方向          │
 └─────────────────────────────────────┘
 ```
 
-## Detailed Design
+## 详细设计
 
 ### UI — `src/lib/gui/dialogs/ServerConfigDialog.ui` + `.cpp/.h`
 
-In the Switching group (currently lines 673-816 in the .ui file), append two
-rows after the existing "Switch on double tap" row:
+在 Switching 分组（.ui 文件当前 673-816 行），"Switch on double tap" 行下面追加两行：
 
-- Row 1: `QCheckBox cbLeaveServerNeedsModifier` with text "Hold modifier to leave
-  server", followed by `QComboBox cmbLeaveServerModifier` with items
-  `["Ctrl", "Shift", "Alt"]` (index 0 = Ctrl default).
-  - The ComboBox's `enabled` property is bound to the checkbox's `checked` state.
-- Row 2: `QCheckBox cbReturnToServerInstant` with text "Return to server without
-  waiting".
+- 第 1 行：`QCheckBox cbLeaveServerNeedsModifier`，文案 "Hold modifier to leave server"，
+  紧跟一个 `QComboBox cmbLeaveServerModifier`，items 为 `["Ctrl", "Shift", "Alt"]`
+  （index 0 = Ctrl 为默认）。
+  - 下拉菜单的 `enabled` 属性绑定到 checkbox 的 `checked` 状态。
+- 第 2 行：`QCheckBox cbReturnToServerInstant`，文案 "Return to server without waiting"。
 
-In `ServerConfigDialog.cpp`:
-- In the constructor (or wherever existing widgets bind), wire the 3 widgets'
-  values to and from `m_serverConfig` (the `ServerConfig` instance).
-- Hook the leave-server checkbox's `toggled(bool)` signal to set the ComboBox's
-  `enabled` property.
+在 `ServerConfigDialog.cpp` 中：
+- 构造函数（或现有控件绑定的地方）把 3 个新控件的值与 `m_serverConfig` 双向绑定。
+- 把 leave-server checkbox 的 `toggled(bool)` 信号接到下拉菜单的 `setEnabled` 槽。
 
-### Data model — `src/lib/gui/config/ServerConfig.h/cpp`
+### 数据模型 — `src/lib/gui/config/ServerConfig.h/cpp`
 
-Add private fields next to `m_SwitchDelay` etc. (around line 243-246):
+在 `m_SwitchDelay` 等字段附近（约 243-246 行）新增私有字段：
 
 ```cpp
 bool m_LeaveServerNeedsModifier = false;
@@ -133,40 +124,37 @@ int  m_LeaveServerModifier      = 0;   // 0=Ctrl, 1=Shift, 2=Alt
 bool m_ReturnToServerInstant    = false;
 ```
 
-Add 3 getter/setter pairs following the existing naming pattern (e.g.,
-`hasLeaveServerNeedsModifier()`, `setLeaveServerNeedsModifier(bool)`,
-`leaveServerModifier()`, `setLeaveServerModifier(int)`, etc.).
+按既有命名风格添加 3 对 getter/setter，例如
+`hasLeaveServerNeedsModifier()`、`setLeaveServerNeedsModifier(bool)`、
+`leaveServerModifier()`、`setLeaveServerModifier(int)` 等。
 
-Persistence:
-- `ServerConfig::save()` / `loadSettings()` (QSettings): add 3 read/write lines
-  matching existing patterns for `m_SwitchDelay`.
-- Serialization to `.conf` text: in the function that emits `switchDelay` and
-  similar keywords, append:
-  - If `m_LeaveServerNeedsModifier`: emit `leaveServerNeedsModifier = <ctrl|shift|alt>`
-  - If `m_ReturnToServerInstant`: emit `returnToServerInstant = true`
+持久化：
+- `ServerConfig::save()` / `loadSettings()`（QSettings）：模仿 `m_SwitchDelay` 现有写法，
+  新增 3 组读 / 写。
+- 序列化到 `.conf` 文本：在输出 `switchDelay` 等关键字的函数里追加：
+  - 若 `m_LeaveServerNeedsModifier`: 输出 `leaveServerNeedsModifier = <control|shift|alt>`
+  - 若 `m_ReturnToServerInstant`: 输出 `returnToServerInstant = true`
 
-### Config parsing — `src/lib/server/Config.cpp`
+### 配置解析 — `src/lib/server/Config.cpp`
 
-In `Config::readOption()` (around line 657, where `switchDelay` etc. are parsed),
-add two new branches:
+在 `Config::readOption()`（约 657 行，解析 `switchDelay` 等的地方）追加两个分支：
 
 ```cpp
 else if (CaselessCmp::equal(name, "leaveServerNeedsModifier")) {
-    // value: "none" | "shift" | "control" | "alt" (caseless)
-    // Maps to m_server->setLeaveServerNeedsModifier(...) and modifier mask
+    // 取值: "none" | "shift" | "control" | "alt"（大小写不敏感）
+    // 调用 m_server->setLeaveServerNeedsModifier(...) 与对应 mask
 }
 else if (CaselessCmp::equal(name, "returnToServerInstant")) {
-    // value: "true" | "false"
-    // Maps to m_server->setReturnToServerInstant(...)
+    // 取值: "true" | "false"
+    // 调用 m_server->setReturnToServerInstant(...)
 }
 ```
 
-Output side: in the function that writes `switchDelay` and friends back to text,
-emit the two new keywords iff the corresponding flag is set.
+输出端：在把 `switchDelay` 等写回文本的函数里，根据两个 flag 的值反向输出关键字。
 
-### Runtime logic — `src/lib/server/Server.h/cpp`
+### 运行时逻辑 — `src/lib/server/Server.h/cpp`
 
-Add to `Server.h` near `m_switchNeedsControl` (around line 384-406):
+在 `Server.h` 中、`m_switchNeedsControl` 附近（约 384-406 行）增加：
 
 ```cpp
 bool m_leaveServerNeedsModifier = false;
@@ -174,65 +162,55 @@ KeyModifierMask m_leaveServerModifierMask = KeyModifierControl;
 bool m_returnToServerInstant = false;
 ```
 
-Plus public setters `setLeaveServerNeedsModifier(KeyModifierMask)` (or two
-arg variant), `setReturnToServerInstant(bool)` callable from `Config`.
+加上对应公开 setter，供 `Config` 调用。
 
-Modify `Server::isSwitchOkay()` (Server.cpp:765). At the top, derive direction
-flags:
+修改 `Server::isSwitchOkay()`（Server.cpp:765）。在函数顶部增加方向判断：
 
 ```cpp
 const bool leavingServer  = (m_active   == m_primaryClient);
 const bool enteringServer = (newScreen  == m_primaryClient);
 ```
 
-Then update three gates:
+然后改三处现有 gate：
 
-1. Double-tap gate (currently lines 793-803): skip the gate entirely when
-   `enteringServer && m_returnToServerInstant`.
-2. Wait-delay gate (currently lines 806-811): skip when
-   `enteringServer && m_returnToServerInstant`.
-3. Modifier gate (currently lines 846-853): rewrite to OR in the new
-   leave-server requirement when `leavingServer`, and zero out all modifier
-   requirements when `enteringServer && m_returnToServerInstant`.
+1. 双击 gate（当前 793-803 行）：若 `enteringServer && m_returnToServerInstant`，整段跳过。
+2. 等待 gate（当前 806-811 行）：同上条件跳过。
+3. 修饰键 gate（当前 846-853 行）：重写——当 `leavingServer` 时 OR 进新的"离开服务器需修饰键"，
+   当 `enteringServer && m_returnToServerInstant` 时把所有修饰键要求全部置为 false。
 
-The three structural gates — no-neighbor (lines 772-778), corner-lock
-(lines 819-836), screen-lock (lines 839-843) — are unchanged.
+三个结构性 gate——无邻居（772-778 行）、死角锁定（819-836 行）、屏幕锁定（839-843 行）——保持不变。
 
-## Testing
+## 测试
 
-Add unit tests in `src/unittests/server/` covering `isSwitchOkay()` decisions.
-Use mocks/fakes of `BaseClientProxy` already established by existing tests.
+在 `src/unittests/server/` 下补充覆盖 `isSwitchOkay()` 决策的单元测试，
+复用现有测试已建好的 `BaseClientProxy` mock / fake。
 
-Four matrix scenarios as listed in the behavior table above:
+按行为矩阵的 4 个组合：
 
-1. Both off → regression test that current behavior is preserved.
-2. Only `leaveServerNeedsModifier=Ctrl`:
-   - Leaving server without Ctrl pressed → returns false.
-   - Leaving server with Ctrl pressed → returns true.
-   - Entering server still walks the wait-delay path.
-3. Only `returnToServerInstant=true`:
-   - Leaving server still goes through wait-delay.
-   - Entering server bypasses wait-delay, double-tap, global-modifier checks.
-4. Both on → target scenario, both rules apply.
+1. 两选项都关 → 回归测试，验证现有行为不变。
+2. 仅 `leaveServerNeedsModifier=Ctrl`：
+   - 离开服务器、未按 Ctrl → 返回 false。
+   - 离开服务器、按住 Ctrl → 返回 true。
+   - 进入服务器仍走 wait-delay 路径。
+3. 仅 `returnToServerInstant=true`：
+   - 离开服务器仍走 wait-delay。
+   - 进入服务器绕过 wait-delay、double-tap、全局修饰键检查。
+4. 两选项都开 → 目标场景，两条规则同时生效。
 
-Existing wait/double-tap unit tests remain untouched (regression safety net).
+现有的 wait / double-tap 单元测试不修改（作为回归网）。
 
-Manual verification:
-- Windows server + Linux/Mac client.
-- All 4 matrix rows.
-- Multi-client layout (one client left, one right): Ctrl-gate applies to both
-  outgoing edges; both return paths are instant.
+手测路径：
+- Windows 起 server + Linux/Mac 起 client。
+- 走完矩阵 4 行。
+- 多客户端布局（左右各一个客户端）：Ctrl 门同时管两个出口边；两边回来都是即时。
 
-## Backward Compatibility
+## 向后兼容性
 
-- Both new fields default to `false`. A user who upgrades and changes nothing
-  sees identical behavior.
-- New `.conf` keywords are additive. Old .conf files parse unchanged.
-- New GUI fields don't conflict with the existing (internal-only)
-  `switchNeedsShift/Control/Alt`; users who somehow set both get the union of
-  requirements when leaving the server.
+- 两个新字段默认 `false`。升级后什么也不改的用户看到完全相同的行为。
+- 新 `.conf` 关键字是叠加式的。老 .conf 文件解析不变。
+- 新 GUI 字段不与现存（内部专用的）`switchNeedsShift/Control/Alt` 冲突；
+  若用户同时设两者，离开服务器时取"取并集"语义。
 
-## Open Questions
+## 开放问题
 
-None at design time. Implementation may surface naming or signal-wiring details
-to confirm during code review.
+设计阶段无遗留问题。实现期间若遇到命名或信号绑线的细节，再于 code review 中确认。
