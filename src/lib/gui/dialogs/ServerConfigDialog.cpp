@@ -107,8 +107,7 @@ ServerConfigDialog::ServerConfigDialog(QWidget *parent, ServerConfig &config)
   ui->cmbLeaveServerModifier->setEnabled(ui->cbLeaveServerNeedsModifier->isChecked());
   ui->cmbLeaveServerModifier->setCurrentIndex(serverConfig().leaveServerModifier());
   connect(
-      ui->cbLeaveServerNeedsModifier, &QCheckBox::toggled, this,
-      &ServerConfigDialog::toggleLeaveServerNeedsModifier
+      ui->cbLeaveServerNeedsModifier, &QCheckBox::toggled, this, &ServerConfigDialog::toggleLeaveServerNeedsModifier
   );
   connect(
       ui->cmbLeaveServerModifier, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
@@ -116,10 +115,7 @@ ServerConfigDialog::ServerConfigDialog(QWidget *parent, ServerConfig &config)
   );
 
   ui->cbReturnToServerInstant->setChecked(serverConfig().returnToServerInstant());
-  connect(
-      ui->cbReturnToServerInstant, &QCheckBox::toggled, this,
-      &ServerConfigDialog::toggleReturnToServerInstant
-  );
+  connect(ui->cbReturnToServerInstant, &QCheckBox::toggled, this, &ServerConfigDialog::toggleReturnToServerInstant);
 
   connect(ui->cbRelativeMouseMoves, &QCheckBox::toggled, this, &ServerConfigDialog::toggleRelativeMouseMoves);
   connect(ui->cbEnableClipboard, &QCheckBox::toggled, this, &ServerConfigDialog::toggleClipboard);

@@ -269,7 +269,7 @@ private:
   bool m_HasSwitchDoubleTap = false;
   int m_SwitchDoubleTap = 0;
   bool m_LeaveServerNeedsModifier = false;
-  int m_LeaveServerModifier = 0;  // 0=Ctrl, 1=Shift, 2=Alt (GUI index)
+  int m_LeaveServerModifier = 0; // 0=Ctrl, 1=Shift, 2=Alt (GUI index)
   bool m_ReturnToServerInstant = false;
   int m_SwitchCornerSize = 0;
   bool m_DefaultLockToScreenState = false;
